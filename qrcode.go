@@ -1,7 +1,6 @@
 package grcode
 
-// #cgo darwin pkg-config: zbar
-// #cgo LDFLAGS: -lzbar
+// #cgo pkg-config: zbar
 // #include <zbar.h>
 import "C"
 import (
@@ -31,7 +30,7 @@ func GetDataFromFile(imagePath string) (results []string, err error) {
 	return GetDataFromImage(m)
 }
 
-//GetDataFromImage read qrcode directly from golang Image class
+// GetDataFromImage read qrcode directly from golang Image class
 func GetDataFromImage(image image.Image) (results []string, err error) {
 
 	scanner := NewScanner()

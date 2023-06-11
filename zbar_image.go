@@ -1,6 +1,6 @@
 package grcode
 
-// #cgo LDFLAGS: -lzbar
+// #cgo pkg-config: zbar
 // #include <zbar.h>
 import "C"
 
