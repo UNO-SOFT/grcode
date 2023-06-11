@@ -22,6 +22,7 @@ func NewScanner() *Scanner {
 	// the finalizer will be called when the garbage collector is invoked.
 	// we can derfer destroy on our own
 	runtime.SetFinalizer(r, (*Scanner).Close)
+	r.SetConfig(0, C.ZBAR_CFG_ENABLE, 1)
 	return r
 }
 
