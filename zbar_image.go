@@ -26,7 +26,7 @@ func NewZbarImage(img image.Image) *ZbarImage {
 	zImg := &ZbarImage{image: C.zbar_image_create()}
 	// draw image to zbar image with garyscale
 	gray := image.NewGray(bounds)
-	draw.Draw(gray, bounds, img, image.ZP, draw.Over)
+	draw.Draw(gray, bounds, img, image.Point{}, draw.Over)
 
 	C.zbar_image_set_format(zImg.image, C.ulong(VX_DF_IMAGE_Y800))
 	C.zbar_image_set_size(zImg.image, C.uint(w), C.uint(h))
@@ -46,6 +46,20 @@ func (z *ZbarImage) GetSymbol() *Symbol {
 		return nil
 	}
 	return NewSymbol(s)
+}
+
+// Symbols returns all the symbols.
+func (z *ZbarImage) DerefSymbols() []DerefSymbol {
+	s := z.GetSymbol()
+	if s == nil {
+		return nil
+	}
+	var symbols []DerefSymbol
+	for ; s != nil; s = s.Next() {
+		symbols = append(symbols, s.Deref())
+	}
+	return symbols
+
 }
 
 // Close suicides

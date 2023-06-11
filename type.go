@@ -46,9 +46,4 @@ type SymbolType struct {
 	t C.zbar_symbol_type_t
 }
 
-func (t SymbolType) IsQRCODE() bool {
-	if t.t == QRCODE {
-		return true
-	}
-	return false
-}
+func (t SymbolType) IsQRCODE() bool { return t.t == QRCODE }

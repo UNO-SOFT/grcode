@@ -5,6 +5,7 @@ package grcode
 import "C"
 
 import (
+	"runtime"
 	"strconv"
 	"unsafe"
 )
@@ -20,7 +21,7 @@ func NewScanner() *Scanner {
 	// runtime.SetFinalizer() works well for automatically free()'ing cgo memory allocations!
 	// the finalizer will be called when the garbage collector is invoked.
 	// we can derfer destroy on our own
-	// runtime.SetFinalizer(r, (*Scanner).Destroy)
+	runtime.SetFinalizer(r, (*Scanner).Close)
 	return r
 }
 
@@ -50,7 +51,10 @@ func (s *Scanner) Scan(img *ZbarImage) (int, error) {
 
 // Close suicides
 func (s *Scanner) Close() {
-	C.zbar_image_scanner_destroy(s.image_scanner) // void function
+	if s != nil && s.image_scanner != nil {
+		C.zbar_image_scanner_destroy(s.image_scanner) // void function
+		s.image_scanner = nil
+	}
 }
 
 type zbarError struct {

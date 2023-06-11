@@ -35,3 +35,12 @@ func (s *Symbol) Data() string {
 func (s *Symbol) Type() SymbolType {
 	return SymbolType{t: C.zbar_symbol_get_type(s.symbol)}
 }
+
+func (s *Symbol) Deref() DerefSymbol {
+	return DerefSymbol{Type: s.Type(), Data: s.Data()}
+}
+
+type DerefSymbol struct {
+	Type SymbolType
+	Data string
+}
