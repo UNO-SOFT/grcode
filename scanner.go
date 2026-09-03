@@ -10,25 +10,36 @@ import (
 	"unsafe"
 )
 
-// Scanner is wrapper of zbar_image_scanner
-type Scanner struct {
-	image_scanner *C.zbar_image_scanner_t
-}
+type (
+	// Scanner is wrapper of zbar_image_scanner
+	Scanner struct {
+		image_scanner *C.zbar_image_scanner_t
+	}
+	config = C.zbar_config_t
+	Option struct {
+		Symbology SymbolType
+		Config    config
+		Value     int
+	}
+)
 
 // NewScanner returns new Scanner
-func NewScanner() *Scanner {
+func NewScanner(options ...Option) *Scanner {
 	r := &Scanner{image_scanner: C.zbar_image_scanner_create()}
 	// runtime.SetFinalizer() works well for automatically free()'ing cgo memory allocations!
 	// the finalizer will be called when the garbage collector is invoked.
 	// we can derfer destroy on our own
 	runtime.SetFinalizer(r, (*Scanner).Close)
 	r.SetConfig(0, C.ZBAR_CFG_ENABLE, 1)
+	for _, o := range options {
+		r.SetConfig(o.Symbology.t, o.Config, o.Value)
+	}
 	return r
 }
 
 // SetConfig sets scanner config
 // 0 for success, non-0 for failure
-func (s *Scanner) SetConfig(symbology C.zbar_symbol_type_t, config C.zbar_config_t, value int) int {
+func (s *Scanner) SetConfig(symbology C.zbar_symbol_type_t, config config, value int) int {
 	return int(C.zbar_image_scanner_set_config(s.image_scanner, symbology, config, C.int(value)))
 }
 

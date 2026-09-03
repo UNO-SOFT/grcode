@@ -47,10 +47,9 @@ func GetDataFromReader(r io.Reader) (results []string, err error) {
 }
 
 // GetDataFromImage read qrcode directly from golang Image class
-func GetDataFromImage(image image.Image) (results []string, err error) {
-	scanner := NewScanner()
+func GetDataFromImage(image image.Image, options ...Option) (results []string, err error) {
+	scanner := NewScanner(options...)
 	defer scanner.Close()
-	scanner.SetConfig(0, C.ZBAR_CFG_ENABLE, 1)
 	zImg := NewZbarImage(image)
 	defer zImg.Close()
 	scanner.Scan(zImg)
