@@ -1,38 +1,53 @@
 package grcode
 
-// #cgo pkg-config: zbar
+// #cgo darwin pkg-config: zbar
+// #cgo LDFLAGS: -lzbar
 // #include <zbar.h>
 import "C"
+
 import (
+	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
-	"log"
+	"io"
 	"os"
 )
 
 type RawData string
 
 func GetDataFromFile(imagePath string) (results []string, err error) {
-	// TODO: read via libjpeg, libpng instead of Go
-	//filePath := C.CString(imagePath)
-	reader, err := os.Open(imagePath)
+	img, err := OpenImage(imagePath)
 	if err != nil {
-		log.Printf("open file error: %v", err)
-		return results, err
+		return nil, err
 	}
-	defer reader.Close()
-	m, _, err := image.Decode(reader)
+	return GetDataFromImage(img)
+}
+
+func OpenImage(imagePath string) (image.Image, error) {
+	fh, err := os.Open(imagePath)
 	if err != nil {
-		log.Printf("decode file error: %v", err)
-		return results, err
+		return nil, err
 	}
+	defer fh.Close()
+	return ImageFromReader(fh)
+}
+
+func ImageFromReader(r io.Reader) (image.Image, error) {
+	m, _, err := image.Decode(r)
+	if err != nil {
+		err = fmt.Errorf("decode: %w", err)
+	}
+	return m, err
+}
+
+func GetDataFromReader(r io.Reader) (results []string, err error) {
+	m, err := ImageFromReader(r)
 	return GetDataFromImage(m)
 }
 
 // GetDataFromImage read qrcode directly from golang Image class
 func GetDataFromImage(image image.Image) (results []string, err error) {
-
 	scanner := NewScanner()
 	defer scanner.Close()
 	scanner.SetConfig(0, C.ZBAR_CFG_ENABLE, 1)
